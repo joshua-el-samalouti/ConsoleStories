@@ -5,9 +5,10 @@ import time
 from settings import *
 
 
-def clear():
-    print('\n'*shutil.get_terminal_size().lines)
-    os.system('cls' if os.name == 'nt' else 'clear')
+def clear(cur_page):
+    if cur_page['clear']:
+        print('\n'*shutil.get_terminal_size().lines)
+        os.system('cls' if os.name == 'nt' else 'clear')
 
 
 def instance(book):
@@ -17,9 +18,10 @@ def instance(book):
     pass
 
 
-def page(cur_page):
-    if cur_page['clear']:
-        clear()
+def composite(cur_page):
+    clear(cur_page)
+    for segment in cur_page['segments']:
+        segment['type']()
     return cur_page['next']
 
 
@@ -43,10 +45,9 @@ def transition(cur_page):
     columns = shutil.get_terminal_size().columns
     start_line = int(shutil.get_terminal_size().lines/2 - cur_page['text'].count('\n')/2)
     cur_text = cur_page['text']  # .center(columns)
-    if cur_page['clear']:
-        clear()
+    clear(cur_page)
     sys.stdout.write('\n'*start_line)
-    if cur_page['delay'] > 0:
+    if cur_page['delay']:
         for i in range(len(cur_text)-1):
             sys.stdout.write(cur_text[i])
             sys.stdout.flush()
@@ -54,5 +55,5 @@ def transition(cur_page):
     else:
         sys.stdout.write(cur_text)
     sys.stdout.write('\n' * start_line)
-    time.sleep(3)
+    time.sleep(cur_page['sleep'])
     return cur_page['next']
