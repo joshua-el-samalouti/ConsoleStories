@@ -21,33 +21,53 @@ def instance(book):
 def composite(cur_page):
     clear(cur_page)
     for segment in cur_page['segments']:
-        segment['type']()
+        if segment['type'] == menu:
+            cur_page['next'] = segment['type'](segment)
+        else:
+            segment['type'](segment)
+        sys.stdout.write('\n')
     return cur_page['next']
 
 
-def text():
+def text(segment):
+    sys.stdout.write(segment['text'])
     pass
 
 
-def header():
+def header(segment):
+    columns = shutil.get_terminal_size().columns
+    cur_text = segment['text'].center(columns)
+    sys.stdout.write(cur_text)
+    sys.stdout.write('\n')
     pass
 
 
-def menu():
-    pass
+def menu(segment):
+    for i in range(len(segment['options'])):
+        sys.stdout.write(str(i+1)+') ')
+        sys.stdout.write(segment['options'][i]['text']+'\n')
+    while True:
+        try:
+            selection = int(input())
+            if int(selection)-1 not in range(len(segment['options'])):
+                sys.stdout.write('\nPlease input a valid option')
+            else:
+                return segment['options'][int(selection)-1]['next']
+        except ValueError:
+            sys.stdout.write('\nPlease input a valid option')
 
 
-def choice():
+def choice(segment):
     pass
 
 
 def transition(cur_page):
     columns = shutil.get_terminal_size().columns
     start_line = int(shutil.get_terminal_size().lines/2 - cur_page['text'].count('\n')/2)
-    cur_text = cur_page['text']  # .center(columns)
+    cur_text = cur_page['text'].center(columns)
     clear(cur_page)
     sys.stdout.write('\n'*start_line)
-    if cur_page['delay']:
+    if 'delay' in cur_page.keys():
         for i in range(len(cur_text)-1):
             sys.stdout.write(cur_text[i])
             sys.stdout.flush()
